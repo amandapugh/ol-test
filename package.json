@@ -9,7 +9,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.4.29"
+    "ol": "^9.2.4",
+    "ol-contextmenu": "^5.4.0",
+    "ol-ext": "^4.0.19",
+    "vue": "^3.4.29",
+    "vue3-openlayers": "^10.0.2"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.5",
