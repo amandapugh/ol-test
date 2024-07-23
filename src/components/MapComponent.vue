@@ -1,23 +1,26 @@
 <template>
   <div ref="mapContainer" class="map-container"></div>
+  <div ref="zoomControl" class="zoom-control"></div>
+  <div ref="mousePositionControl" class="mouse-position-control"></div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import 'ol/ol.css'
 import Map from 'ol/Map'
 import View from 'ol/View'
 import TileLayer from 'ol/layer/Tile'
 import OSM from 'ol/source/OSM'
+import ZoomSlider from 'ol/control/ZoomSlider'
 import MousePosition from 'ol/control/MousePosition'
-import ScaleLine from 'ol/control/ScaleLine'
-import Zoom from 'ol/control/Zoom'
 import { createStringXY } from 'ol/coordinate'
 
 const mapContainer = ref<HTMLDivElement | null>(null)
+const zoomControl = ref<HTMLDivElement | null>(null)
+const mousePositionControl = ref<HTMLDivElement | null>(null)
 
 onMounted(() => {
-  if (mapContainer.value) {
+  if (mapContainer.value && zoomControl.value && mousePositionControl.value) {
     const view = new View({
       center: [0, 0],
       zoom: 2
@@ -27,21 +30,25 @@ onMounted(() => {
       target: mapContainer.value,
       layers: [
         new TileLayer({
-          source: new OSM(),
-        }),
+          source: new OSM()
+        })
       ],
-      view: view,
-      controls: [
-        new MousePosition({
-          coordinateFormat: createStringXY(4),
-          projection: 'EPSG:4326',
-          className: 'custom-mouse-position',
-          target: document.getElementById('mouse-position')!,
-        }),
-        new ScaleLine(),
-        new Zoom()
-      ]
+      view: view
     })
+
+    // Initialize the ZoomSlider control and add to map
+    const zoomSlider = new ZoomSlider({
+      target: zoomControl.value
+    })
+    map.addControl(zoomSlider)
+
+    // Initialize the MousePosition control and add to map
+    const mousePosition = new MousePosition({
+      coordinateFormat: createStringXY(4),
+      projection: 'EPSG:4326',
+      target: mousePositionControl.value
+    })
+    map.addControl(mousePosition)
 
     // Add event listener for map clicks
     map.on('singleclick', (event) => {
@@ -54,12 +61,6 @@ onMounted(() => {
       const coordinates = event.coordinate
       console.log('Pointer moved to:', coordinates)
     })
-
-    // Add zoom listener
-    view.on('change:resolution', () => {
-      const zoom = view.getZoom()
-      console.log('Zoom level changed to:', zoom)
-    })
   }
 })
 </script>
@@ -68,15 +69,19 @@ onMounted(() => {
 .map-container {
   width: 100%;
   height: 100vh;
-  position: relative;
 }
 
-.custom-mouse-position {
+.zoom-control {
   position: absolute;
-  bottom: 10px;
+  right: 10px;
+  top: 50px;
+}
+
+.mouse-position-control {
+  position: absolute;
   left: 10px;
-  padding: 2px;
-  background: rgba(0, 60, 136, 0.5);
-  color: white;
+  bottom: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 5px;
 }
 </style>
